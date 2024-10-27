@@ -13,9 +13,10 @@ const upload = multer({ storage: storage });
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('public')); // Serve static files from the 'public' directory
 
-app.post('/send-email', upload.single('pdf'), (req, res) => {
+app.post('/send-email', upload.fields([{ name: 'pdf', maxCount: 1 }, { name: 'image', maxCount: 1 }]), (req, res) => {
     const { email, subject, message } = req.body;
-    const pdf = req.file;
+    const pdf = req.files['pdf'] ? req.files['pdf'][0] : null;
+    const image = req.files['image'] ? req.files['image'][0] : null;
 
     const transporter = nodemailer.createTransport({
         service: 'gmail',
@@ -25,17 +26,26 @@ app.post('/send-email', upload.single('pdf'), (req, res) => {
         },
     });
 
+    const attachments = [];
+    if (pdf) {
+        attachments.push({
+            filename: pdf.originalname,
+            content: pdf.buffer,
+        });
+    }
+    if (image) {
+        attachments.push({
+            filename: image.originalname,
+            content: image.buffer,
+        });
+    }
+
     const mailOptions = {
-        from: 'your-email@gmail.com',
+        from: 'iamtilose@gmail.com', // your email
         to: email,
         subject: subject,
         text: message,
-        attachments: [
-            {
-                filename: pdf.originalname,
-                content: pdf.buffer,
-            },
-        ],
+        attachments: attachments,
     };
 
     transporter.sendMail(mailOptions, (error, info) => {
