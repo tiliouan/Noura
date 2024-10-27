@@ -1,8 +1,7 @@
 const express = require('express');
-const nodemailer = require('nodemailer');
 const bodyParser = require('body-parser');
 const multer = require('multer');
-const path = require('path');
+const nodemailer = require('nodemailer');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -48,7 +47,7 @@ app.post('/send-email', upload.single('pdf'), (req, res) => {
 });
 
 app.get('/success', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'success.html'));
+    res.sendFile(__dirname + '/public/success.html');
 });
 
 app.listen(PORT, () => {
